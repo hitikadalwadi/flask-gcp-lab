@@ -1,38 +1,23 @@
 from flask import Flask, request, jsonify
-from predict import predict_iris
+from predict import predict_price, FEATURE_NAMES
 import os
 
 app = Flask(__name__)
 
-# Map numeric model output to human-readable class
-label_map = {
-    0: "setosa",
-    1: "versicolor",
-    2: "virginica"
-}
-
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
-    sepal_length = float(data['sepal_length'])
-    sepal_width  = float(data['sepal_width'])
-    petal_length = float(data['petal_length'])
-    petal_width  = float(data['petal_width'])
-
-    print(sepal_length, sepal_width, petal_length, petal_width)
-
-    # call model
-    prediction = predict_iris(sepal_length, sepal_width, petal_length, petal_width)
-
-    # convert numeric class → label string for frontend
+    missing = [name for name in FEATURE_NAMES if name not in data]
+    if missing:
+        return jsonify({'error': f'missing fields: {missing}'}), 400
     try:
-        pred_int = int(prediction)
-        pred_label = label_map.get(pred_int, str(pred_int))
-    except Exception:
-        pred_label = str(prediction)
+        values = {name: float(data[name]) for name in FEATURE_NAMES}
+    except (TypeError, ValueError):
+        return jsonify({'error': 'all fields must be numeric'}), 400
 
-    return jsonify({'prediction': pred_label})
+    price = predict_price(**values)
+    return jsonify({'prediction': round(price, 2)})
 
 if __name__ == '__main__':
     app.run(
