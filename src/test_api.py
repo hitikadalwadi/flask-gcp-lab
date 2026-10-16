@@ -3,11 +3,16 @@ import json
 
 url = 'http://127.0.0.1:8080/predict'
 
+# A sample district (values from the first row of the dataset)
 payload = {
-    'sepal_length': 5.1,
-    'sepal_width': 3.5,
-    'petal_length': 1.4,
-    'petal_width': 0.2
+    'med_inc': 8.3252,
+    'house_age': 41,
+    'ave_rooms': 6.98,
+    'ave_bedrms': 1.02,
+    'population': 322,
+    'ave_occup': 2.56,
+    'latitude': 37.88,
+    'longitude': -122.23
 }
 
 headers = {
@@ -22,7 +27,7 @@ print("Body:", response.text)
 if response.status_code == 200:
     try:
         prediction = response.json()['prediction']
-        print('Predicted species:', prediction)
+        print(f'Predicted median house value: ${prediction:,.0f}')
     except Exception as e:
         print("Could not parse JSON:", e)
 else:

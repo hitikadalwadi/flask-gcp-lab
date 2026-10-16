@@ -3,13 +3,22 @@ import joblib
 import os
 from train import run_training
 
+# Input fields, in the order the model was trained on
+FEATURE_NAMES = [
+    "med_inc", "house_age", "ave_rooms", "ave_bedrms",
+    "population", "ave_occup", "latitude", "longitude"
+]
+
 # Load the trained model
 model = joblib.load("model/model.pkl")
 
-def predict_iris(sepal_length, sepal_width, petal_length, petal_width):
-    input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
+def predict_price(med_inc, house_age, ave_rooms, ave_bedrms,
+                  population, ave_occup, latitude, longitude):
+    """Returns the predicted median house value in US dollars."""
+    input_data = np.array([[med_inc, house_age, ave_rooms, ave_bedrms,
+                            population, ave_occup, latitude, longitude]])
     prediction = model.predict(input_data)
-    return prediction[0]
+    return float(prediction[0]) * 100000  # model output is in $100,000s
 
 if __name__ == "__main__":
     if os.path.exists("model/model.pkl"):
